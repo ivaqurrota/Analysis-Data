@@ -1,0 +1,22 @@
+###########ANALISIS DATA##########
+library(cluster)    # Algoritma klastering
+library(factoextra) # Algoritma klastering dan visualisasi
+library(tidyverse)
+library(mclust)
+
+#import data from R
+data<-read.csv("E:/Semester 7/Analisis Data/data_pendidikan.csv", header=TRUE, sep=";")
+head(data)
+str(data)
+dataclus <- data[,-1]
+
+#check missing values
+dataclus1 <- na.omit(dataclus)
+head(dataclus1)
+summary(dataclus1)
+
+#standarisasi data
+datafix <- scale(dataclus) #standarisasi data
+datafix
+fviz_nbclust(datafix,kmeans,method="wss")
+fviz_nbclust(datafix,kmeans,method="silhouette")
