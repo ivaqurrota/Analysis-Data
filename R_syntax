@@ -1,0 +1,6 @@
+library(ggplot2)
+
+data=read.csv("C:/Users/Iva/Documents/STATISTIK'18/THN 4/Semester 7/Andat C/Tugas/Kelompok 7/DATA.csv",header = TRUE, sep = ";")
+data
+plot = ggplot(data,aes(x=Year, fill=Entity)) + geom_histogram( color="#e9ecef", alpha=0.6, position = 'identity') + scale_fill_manual(values=c("#69b3a2", "#404080"))+ labs(fill="")
+plot
