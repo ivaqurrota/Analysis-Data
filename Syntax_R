@@ -1,0 +1,79 @@
+setwd("C:/Users/Iva/Documents/STATISTIK'18/THN 4/Semester 7/Andat C/Tugas/Week 10 - Kelompok")
+df= read.csv("bismillah.csv", header=TRUE, sep=";")
+head(df)
+summary(df)
+str(df)
+df$Total.Cases<-as.numeric(df$Total.Cases)
+df$Total.Deaths<-as.numeric(df$Total.Deaths)
+df$Total.Recovered<-as.numeric(df$Total.Recovered)
+df$Active.Cases<-as.numeric(df$Active.Cases)
+df_numeric<-df[,2:6]
+df_numeric
+
+#KMO
+library(psych)
+r=cor(df_numeric)
+KMO(r)
+
+#uji Barlett
+bartlett.test(df_numeric)
+
+#Uji Multiko
+library("PerformanceAnalytics")
+chart.Correlation(df_numeric, histogram=TRUE, pch=19)
+
+#PCA
+df_pca <- prcomp(x = df_numeric, scale. = TRUE, center = TRUE) 
+names(df_pca)
+summary(df_pca)
+
+#screeplot
+screeplot(df_pca, type = "l", npcs = 5, main = "Screeplot")
+abline(h = 1, col="red", lty=5)
+legend("topright", legend=c("Eigenvalue = 1"),
+       col=c("red"), lty=5, cex=0.6)
+
+#cumulative Proportion
+cumpro <- cumsum(df_pca$sdev^2 / sum(df_pca$sdev^2))
+plot(cumpro[0:5], xlab = "PC #", ylab = "Amount of explained variance",
+     main = "Cumulative variance plot")
+abline(v = 2, col="blue", lty=5)
+abline(h = 0.8571, col="blue", lty=5)
+legend("topleft", legend=c("Cut-off @ PC2"),
+       col=c("blue"), lty=5, cex=0.6)
+
+#Proportion of variance
+plot(df_pca$x[,1],df_pca$x[,2], xlab="PC1 (57.34%)", ylab = "PC2 (28.37%)",
+     main = "PC1 / PC2 - plot")
+ncomp=2
+df_pca$rotation[,1:2]
+rawLoadings     <- df_pca$rotation[,1:ncomp] %*% diag(df_pca$sdev, ncomp, ncomp)
+rotatedLoadings <- varimax(rawLoadings)$loadings
+
+library("factoextra")
+fviz_pca_var(df_pca, col.var="coord",
+             gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"),
+             repel = TRUE, # Avoid text overlapping
+             axes = c(1, 2)) # choose PCs to plot
+
+#FAMD
+library("FactoMineR")
+library("factoextra")
+FAMD (df, ncp = 5, sup.var = NULL, ind.sup = NULL, graph = TRUE)
+res.famd <- FAMD(df, graph = FALSE)
+print(res.famd)
+
+
+#Biplot Country
+ind <- get_famd_ind(res.famd)
+ind
+head(ind$coord)
+fviz_famd_ind(res.famd, col.ind = "cos2", repel = TRUE) + ggtitle("Clustering according to PC") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+#K-Means Cluster
+rownames(df_numeric) <- df$Country
+fviz_nbclust(df_numeric, kmeans, method = "silhouette") # metode silhouette
+km <- kmeans(df_numeric, centers = 3, nstart = 25)
+str(km)
+fviz_cluster(km, data = df_numeric)
